@@ -1,6 +1,7 @@
 
 
 import axios from 'axios';
+console.log("API URL =", import.meta.env.VITE_API_BASE_URL);
 
 // 🌐 Public API instance for unauthenticated requests (registration, public content)
 export const publicApi = axios.create({

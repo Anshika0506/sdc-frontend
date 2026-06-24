@@ -7,6 +7,7 @@ import git from "../../../assets/social/GitIcon.svg";
 import cross from "../../../assets/icons/cross.svg";
 import attachicon from "../../../assets/buttons/PlusButton.svg";
 import { getPeople } from "../../../api/Public/getPeople";
+import { postApplication } from "../../../api/Public/postApplication";
 
 const years = ["1st", "2nd", "3rd", "4th"];
 const branches = [
@@ -101,6 +102,7 @@ const TeamMembers = () => {
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [resumeFile, setResumeFile] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchTeam = async () => {
@@ -133,29 +135,42 @@ const TeamMembers = () => {
     setResumeFile(e.target.files[0]);
   };
 
-  const handleApply = () => {
-    // You can add your form submission logic here
-    console.log("Form Data:", formData);
-    console.log("Resume File:", resumeFile);
-    alert(
-      "Application submitted! (This is a demo. Actual submission logic would be here.)"
-    );
-    setShowModal(false); // Close the modal after applying
-    // Optionally reset form data
-    setFormData({
-      name: "",
-      contact: "",
-      email: "",
-      year: "",
-      branch: "",
-      enrollment: "",
-      position: "",
-      experience: "",
-    });
-    setSelectedYear(null);
-    setSelectedBranch(null);
-    setSelectedPosition(null);
-    setResumeFile(null);
+  const handleApply = async () => {
+    setSubmitting(true);
+    try {
+      const form = new FormData();
+      form.append("name", formData.name);
+      form.append("contactNumber", formData.contact);
+      form.append("email", formData.email);
+      form.append("year", selectedYear || formData.year);
+      form.append("branch", selectedBranch || formData.branch);
+      form.append("enrollmentNumber", formData.enrollment);
+      form.append("position", selectedPosition || formData.position);
+      form.append("pastExperience", formData.experience);
+      if (resumeFile) form.append("file", resumeFile);
+
+      await postApplication(form);
+      setShowModal(false);
+      setFormData({
+        name: "",
+        contact: "",
+        email: "",
+        year: "",
+        branch: "",
+        enrollment: "",
+        position: "",
+        experience: "",
+      });
+      setSelectedYear(null);
+      setSelectedBranch(null);
+      setSelectedPosition(null);
+      setResumeFile(null);
+    } catch (err) {
+      console.error("Application failed:", err);
+      alert("Failed to submit application. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

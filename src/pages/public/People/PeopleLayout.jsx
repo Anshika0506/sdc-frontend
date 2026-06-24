@@ -1,12 +1,8 @@
-// // src/routes/AppRoutes.jsx
+import FacultyCards from "./FacultyCards.jsx";
+import TeamCards from "./TeamCards.jsx";
+import AlumniCards from "./AlumniCards.jsx";
 
-import { Routes, Route } from "react-router-dom";
-
-import FacultyCards from "../People/FacultyCards.jsx";
-import TeamCards from "../People/TeamCards.jsx";
-import AlumniCards from "../People/AlumniCards.jsx";
-
-const HomeLayout = () => {
+const PeopleLayout = () => {
   return (
     <>
       <FacultyCards />
@@ -15,4 +11,5 @@ const HomeLayout = () => {
     </>
   );
 };
-export default HomeLayout;
+
+export default PeopleLayout;

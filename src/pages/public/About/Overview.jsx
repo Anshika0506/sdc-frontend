@@ -14,10 +14,10 @@ const OverviewSection = () => {
         if (savedIds.length > 0) {
           const aboutOnly = savedIds
             .map((id) => data.find((img) => img.id === id))
-            .filter(Boolean); // Remove nulls if any
+            .filter(Boolean);
           setAboutImages(aboutOnly);
         } else {
-          setAboutImages(data.slice(0, 4)); // fallback
+          setAboutImages([]);
         }
       } catch (error) {
         console.error("Failed to fetch About images:", error);

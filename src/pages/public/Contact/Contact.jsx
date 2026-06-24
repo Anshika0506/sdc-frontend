@@ -1,5 +1,5 @@
 import { FaInstagram, FaLinkedin } from "react-icons/fa";
-import React, { useState, useRef, useEffect } from "react"; // Import React
+import React, { useState, useEffect } from "react";
 import meshGradient from "../../../assets/images/mesh-gradient.webp";
 import instagramIcon from "../../../assets/social/instagramIcon.svg";
 import linkedinIcon from "../../../assets/social/linkedinIcon.svg";
@@ -32,11 +32,8 @@ const Contact = () => {
   }, []);
 
   const [openFaq, setOpenFaq] = useState(-1);
-  const [isQueryOpen, setIsQueryOpen] = useState(false);
   const [selectedQuery, setSelectedQuery] = useState("");
-  const queryRef = useRef(null);
 
-  // Form state
   const [name, setName] = useState("");
   const [contactNo, setContactNo] = useState("");
   const [email, setEmail] = useState("");
@@ -52,27 +49,6 @@ const Contact = () => {
   const [faqs, setFaqs] = useState([]);
   const [faqsLoading, setFaqsLoading] = useState(true);
   const [faqsError, setFaqsError] = useState("");
-
-  const queries = [
-    "Application Development",
-    "Software Development",
-    "Website Development",
-    "Join Our Team",
-    "Other",
-  ];
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (queryRef.current && !queryRef.current.contains(event.target)) {
-        setIsQueryOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   // Fetch FAQs from backend
   useEffect(() => {
@@ -377,64 +353,22 @@ const Contact = () => {
                    {formErrors.contactNo && <p className="text-red-400 text-xs mt-1">{formErrors.contactNo}</p>}
                 </div>
 
-                {/* Query - Custom Dropdown */}
-                <div
-                  className="flex-1 flex flex-col gap-1.5 relative"
-                  ref={queryRef}
-                >
+                {/* Query */}
+                <div className="flex-1 flex flex-col gap-1.5">
                   <label className="text-white text-sm font-semibold font-inter uppercase tracking-wide">
                     Query
                   </label>
-                  <div
-                    className="w-full px-4 py-3 relative rounded-[10px] shadow-[inset_2px_2px_6px_0px_rgba(255,255,255,0.50)] flex flex-col justify-center items-start gap-2.5 cursor-pointer h-12"
-                    onClick={() => setIsQueryOpen(!isQueryOpen)}
-                  >
-                    {/* Selected or placeholder */}
-                    <div className="relative z-10 w-full flex justify-between items-center">
-                      <span className="text-white text-base font-normal font-ibmplexmono">
-                        {selectedQuery || "Select query"}
-                      </span>
-                      <svg
-                        className={`w-4 h-4 text-white transition-transform ${
-                          isQueryOpen ? "rotate-180" : ""
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    </div>
+                  <div className="relative h-12 flex items-center rounded-[10px] shadow-[inset_2px_2px_6px_0px_rgba(255,255,255,0.50)] overflow-hidden px-4 py-3">
+                    <div className="absolute w-[753.43px] h-24 left-[-83.71px] top-[-22.67px] bg-white/5 backdrop-blur-[3px]" />
+                    <input
+                      type="text"
+                      placeholder="Enter query type"
+                      className="relative z-10 bg-transparent outline-none border-none w-full text-base font-normal font-ibmplexmono text-[#D2D2D2] placeholder:text-[#D2D2D2]"
+                      value={selectedQuery}
+                      onChange={(e) => setSelectedQuery(e.target.value)}
+                      required
+                    />
                   </div>
-                  {isQueryOpen && (
-                    <div className="absolute z-30 w-full top-full mt-1 bg-[#1A1A1A] rounded-[10px] shadow-lg border border-[#333333] overflow-hidden">
-                      {queries.map((query, index) => (
-                        <div key={index}>
-                          {index > 0 && (
-                            <div className="h-px bg-[#333333]"></div>
-                          )}
-                          <div
-                            className="w-full py-3 px-4 hover:bg-[#2A2A2A] transition-colors"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedQuery(query);
-                              setIsQueryOpen(false);
-                            }}
-                          >
-                            <div className="text-white text-base font-normal font-ibmplexmono">
-                              {query}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
 

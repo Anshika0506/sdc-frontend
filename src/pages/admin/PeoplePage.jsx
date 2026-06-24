@@ -13,6 +13,7 @@ import { getPeople } from "../../api/Admin/People/getPeople";
 import { postPeople } from "../../api/Admin/People/postPeople";
 import { updatePeople } from "../../api/Admin/People/updatePeople";
 import { deletePeople } from "../../api/Admin/People/deletePeople";
+import { getProject } from "../../api/Admin/Project/getProject";
 
 const PeoplePage = () => {
   const [loading, setLoading] = useState(true);
@@ -30,12 +31,26 @@ const PeoplePage = () => {
   const [frame3Img] = useState(frame3);
   const frame4Img = frame4;
 
-  const availableProjects = [
-    { id: 1, name: "Project Alpha" },
-    { id: 2, name: "Project Beta" },
-    { id: 3, name: "Project Gamma" },
-    { id: 4, name: "Project Delta" }
-  ];
+  const [availableProjects, setAvailableProjects] = useState([]);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const res = await getProject();
+        const projects = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+        setAvailableProjects(
+          projects.map((p) => ({
+            id: p.projectID || p.id,
+            name: p.title || p.projectName || "Untitled Project",
+          }))
+        );
+      } catch (err) {
+        console.error("Failed to fetch projects:", err);
+        setAvailableProjects([]);
+      }
+    };
+    fetchProjects();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {

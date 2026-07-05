@@ -1,16 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Mail from '../../../assets/icons/mail.png';
+import { usePageContent } from "../../../context/PageContentContext";
 
 const Services = () => {
-  const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { content, loading } = usePageContent();
+  const { pageTitle, items, ctaHeading, ctaBody } = content.services;
   const navigate = useNavigate();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    setLoading(false);
-    setServices([]);
   }, []);
 
   return (
@@ -23,17 +22,17 @@ const Services = () => {
           lineHeight: '32px',
         }}
       >
-        Our Services
+        {pageTitle}
       </h2>
 
       {loading ? (
         <p className="text-white/80 text-center py-10">Loading services...</p>
-      ) : services.length === 0 ? (
+      ) : items.length === 0 ? (
         <p className="text-white/60 text-center py-10">No services to display.</p>
       ) : (
         <div className="space-y-8">
-          {services.map((service, index) => (
-            <div key={service.id || index} className="border-b border-white pb-4">
+          {items.map((service, index) => (
+            <div key={index} className="border-b border-white pb-4">
               <h3
                 className="text-lg sm:text-xl font-semibold"
                 style={{
@@ -62,9 +61,7 @@ const Services = () => {
       )}
 
       <div className="mt-10 text-center py-8 px-4 rounded-lg backdrop-blur-sm">
-        <h4 className="text-lg sm:text-xl font-bold mb-2">
-          Still Figuring Out Your Requirements?
-        </h4>
+        <h4 className="text-lg sm:text-xl font-bold mb-2">{ctaHeading}</h4>
         <p
           className="text-sm sm:text-base text-white/80"
           style={{
@@ -73,7 +70,7 @@ const Services = () => {
             lineHeight: '24px',
           }}
         >
-          Get in touch with us today and we'll help you bring your idea to life.
+          {ctaBody}
         </p>
       </div>
 

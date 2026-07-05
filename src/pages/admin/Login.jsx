@@ -16,7 +16,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate("/admin/dashboard", { replace: true });
+      navigate("/admin", { replace: true });
     }
   }, [isLoggedIn, navigate]);
 
@@ -32,7 +32,7 @@ export default function LoginPage() {
       const userData = await login(email, password);
       
       if (userData) {
-        navigate("/admin/dashboard", { replace: true });
+        navigate("/admin", { replace: true });
       }
     } catch (err) {
       console.error('Login error:', err);

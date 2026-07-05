@@ -15,6 +15,31 @@ import { updatePeople } from "../../api/Admin/People/updatePeople";
 import { deletePeople } from "../../api/Admin/People/deletePeople";
 import { getProject } from "../../api/Admin/Project/getProject";
 
+const extractList = (res) => {
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res?.data)) return res.data;
+  return [];
+};
+
+const blankTeamMember = () => ({
+  name: "",
+  branch: "",
+  position: "",
+  linkdin_url: "",
+  github_url: "",
+  insta_url: "",
+  image: null,
+  projectIds: [],
+});
+
+const blankAlumni = () => ({
+  aluminiName: "",
+  companyName: "",
+  lpa: "",
+  content: "",
+  image: null,
+});
+
 const PeoplePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,8 +86,8 @@ const PeoplePage = () => {
           getPeople("teamMembers"),
           getPeople("alumni"),
         ]);
-        setTeamData1(Array.isArray(teamRes.data) ? teamRes.data : []);
-        setTeamData2(Array.isArray(alumniRes.data) ? alumniRes.data : []);
+        setTeamData1(extractList(teamRes));
+        setTeamData2(extractList(alumniRes));
       } catch (err) {
         setError('Failed to load data.');
       } finally {
@@ -71,6 +96,18 @@ const PeoplePage = () => {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (isTeamEditing && teamData1.length === 0) {
+      setTeamData1([blankTeamMember()]);
+    }
+  }, [isTeamEditing, teamData1.length]);
+
+  useEffect(() => {
+    if (isAlumniEditing && teamData2.length === 0) {
+      setTeamData2([blankAlumni()]);
+    }
+  }, [isAlumniEditing, teamData2.length]);
 
   // -- ID Helper
   const getMemberId = (member, type) => {
@@ -120,66 +157,62 @@ const PeoplePage = () => {
     setActiveTeamData(updated);
   };
 
-  // Helper to build payload for updatePeople
   const buildPayload = (member, type) => {
-    if (member.image && typeof member.image !== "string") {
-      const formData = new FormData();
-      if (type === "teamMembers") {
-        formData.append("name", member.name);
-        formData.append("branch", member.branch);
-        formData.append("position", member.position);
-        formData.append("linkdin_url", member.linkdin_url);
-        formData.append("github_url", member.github_url);
-        formData.append("insta_url", member.insta_url);
-        formData.append("projectIds", JSON.stringify(member.projectIds || []));
-      } else if (type === "alumni") {
-        formData.append("aluminiName", member.aluminiName);
-        formData.append("companyName", member.companyName);
-        formData.append("lpa", member.lpa);
-        formData.append("content", member.content);
+    if (type === "teamMembers") {
+      const payload = {
+        name: member.name || "",
+        branch: member.branch || "",
+        position: member.position || "",
+        linkdin_url: member.linkdin_url || "",
+        github_url: member.github_url || "",
+        insta_url: member.insta_url || "",
+        projectIds: Array.isArray(member.projectIds) ? member.projectIds : [],
+      };
+      if (member.image && typeof member.image !== "string") {
+        payload.image = member.image;
       }
-      formData.append("image", member.image);
-      return formData;
+      return payload;
     }
-    return member;
+
+    const payload = {
+      aluminiName: member.aluminiName || "",
+      companyName: member.companyName || "",
+      lpa: member.lpa || "",
+      content: member.content || "",
+    };
+    if (member.image && typeof member.image !== "string") {
+      payload.image = member.image;
+    }
+    return payload;
   };
 
+  const getApiErrorMessage = (err, fallback) =>
+    err?.response?.data?.message || err?.message || fallback;
+
   // CRUD
-  const handleAddNew = async () => {
+  const handleAddNew = () => {
     const [activeTeamData, setActiveTeamData, type] = getActiveTeamData();
-    let newMember = {};
-    if (type === "teamMembers") {
-      newMember = {
-        name: '', branch: '', position: '',
-        linkdin_url: '', github_url: '', insta_url: '',
-        image: null,
-        projectIds: []
-      };
-    } else if (type === "alumni") {
-      newMember = {
-        aluminiName: '', companyName: '', lpa: '', content: '', image: null
-      };
-    }
-    try {
-      const res = await postPeople(type, newMember);
-      const newItemObj = res.data ? res.data : res;
-      setActiveTeamData([newItemObj, ...activeTeamData]);
-    } catch (err) {
-      setError('Failed to add new member.');
-    }
+    const newMember = type === "teamMembers" ? blankTeamMember() : blankAlumni();
+    setActiveTeamData([...activeTeamData, newMember]);
   };
 
   const handleDeleteMember = async (index) => {
     const [activeTeamData, setActiveTeamData, type] = getActiveTeamData();
     const member = activeTeamData[index];
     const id = getMemberId(member, type);
+    if (!id) {
+      const updated = [...activeTeamData];
+      updated.splice(index, 1);
+      setActiveTeamData(updated);
+      return;
+    }
     try {
       await deletePeople(type, id);
       const updated = [...activeTeamData];
       updated.splice(index, 1);
       setActiveTeamData(updated);
     } catch (err) {
-      setError('Failed to delete member.');
+      setError(getApiErrorMessage(err, "Failed to delete member."));
     }
   };
 
@@ -197,10 +230,10 @@ const PeoplePage = () => {
 
   const handleEditClick = (teamId) => {
     setCurrentEditingTeamId(teamId);
-    if (teamId === 'team1') {
+    if (teamId === "team1") {
       setIsTeamEditing(true);
       setIsAlumniEditing(false);
-    } else if (teamId === 'team2') {
+    } else if (teamId === "team2") {
       setIsAlumniEditing(true);
       setIsTeamEditing(false);
     }
@@ -208,32 +241,40 @@ const PeoplePage = () => {
 
   const handleSaveAndClose = async () => {
     const [activeTeamData, , type] = getActiveTeamData();
-    const isEmptyCardPresent = activeTeamData.some(member => {
-      if (type === 'teamMembers') {
-        return !member.name.trim() && !member.branch.trim() && !member.position.trim() &&
-               !member.linkdin_url.trim() && !member.github_url.trim() && !member.insta_url.trim();
-      } else if (type === 'alumni') {
-        return !member.aluminiName.trim() && !member.companyName.trim() &&
-               !member.lpa.trim() && !member.content.trim();
+    const isEmptyCardPresent = activeTeamData.some((member) => {
+      if (type === "teamMembers") {
+        return !(member.name || "").trim();
+      }
+      if (type === "alumni") {
+        return !(member.aluminiName || "").trim();
       }
       return false;
     });
     if (isEmptyCardPresent) {
-      alert("Please add details to any empty cards before saving.");
+      alert("Please enter at least a name before saving.");
       return;
     }
     try {
-      await Promise.all(
+      const [, setActiveTeamData] = getActiveTeamData();
+      const saved = await Promise.all(
         activeTeamData.map(async (member) => {
           const id = getMemberId(member, type);
           const payload = buildPayload(member, type);
-          await updatePeople(type, id, payload);
+          if (id) {
+            await updatePeople(type, id, payload);
+            return member;
+          }
+          const res = await postPeople(type, payload);
+          return res?.data ?? res;
         })
       );
+      setActiveTeamData(saved.filter(Boolean));
       setIsTeamEditing(false);
       setIsAlumniEditing(false);
+      setError(null);
     } catch (err) {
-      setError('Failed to save changes.');
+      setError(getApiErrorMessage(err, "Failed to save changes."));
+      alert(getApiErrorMessage(err, "Failed to save changes."));
     }
   };
 
@@ -313,11 +354,15 @@ const PeoplePage = () => {
   const [activeTeamData] = getActiveTeamData();
 
   if (loading) return <div className="text-center text-white pt-10">Loading...</div>;
-  if (error) return <div className="text-center text-red-500 pt-10">{error}</div>;
 
   return (
     <div className='w-full min-h-screen flex justify-center items-start pt-10 px-4'>
       <div className='w-full max-w-[1136px] h-auto pb-[80px]'>
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-900/40 border border-red-500 text-red-200 px-4 py-3 text-sm">
+            {error}
+          </div>
+        )}
         {renderTeamBox("Team Members", teamData1, 'team1')}
         {renderTeamBox("Alumni", teamData2, 'team2')}
 
@@ -331,6 +376,11 @@ const PeoplePage = () => {
 
               <div className="flex flex-col max-h-[80vh]">
                 <div className="scroll-container overflow-y-auto px-6 pt-6 pb-2 flex flex-col gap-6" style={{ maxHeight: "calc(80vh - 130px)" }}>
+                  {activeTeamData.length === 0 && (
+                    <p className="text-white/60 text-center py-8">
+                      No team members yet. Click <strong>ADD NEW</strong> to create one.
+                    </p>
+                  )}
                   {activeTeamData.map((member, idx) => (
                     <div key={getMemberId(member, "teamMembers") || idx} className="flex gap-4 items-start p-4 rounded-lg">
                       <label className="relative min-w-[131px] w-[131px] h-[168px] shrink-0 cursor-pointer border-white border-2 rounded-xl">
@@ -352,22 +402,22 @@ const PeoplePage = () => {
                       </label>
                       <div className="flex flex-col grow gap-[6px] px-[10px] py-[12px]">
                         <label className={labelStyle}>Student Name</label>
-                        <input className={`${inputStyle} w-[620px]`} value={member.name} onChange={e => handleChange(idx, 'name', e.target.value)} placeholder="Student Name" />
+                        <input className={`${inputStyle} w-[620px]`} value={member.name || ""} onChange={e => handleChange(idx, 'name', e.target.value)} placeholder="Student Name" />
 
                         <label className={labelStyle}>Branch</label>
-                        <input className={`${inputStyle} w-[620px]`} value={member.branch} onChange={e => handleChange(idx, 'branch', e.target.value)} placeholder="Branch" />
+                        <input className={`${inputStyle} w-[620px]`} value={member.branch || ""} onChange={e => handleChange(idx, 'branch', e.target.value)} placeholder="Branch" />
 
                         <label className={labelStyle}>Position</label>
-                        <input className={`${inputStyle} w-[620px]`} value={member.position} onChange={e => handleChange(idx, 'position', e.target.value)} placeholder="Position" />
+                        <input className={`${inputStyle} w-[620px]`} value={member.position || ""} onChange={e => handleChange(idx, 'position', e.target.value)} placeholder="Position" />
 
                         <label className={labelStyle}>LinkedIn URL</label>
-                        <input className={`${inputStyle} w-[620px]`} value={member.linkdin_url} onChange={e => handleChange(idx, 'linkdin_url', e.target.value)} placeholder="LinkedIn" />
+                        <input className={`${inputStyle} w-[620px]`} value={member.linkdin_url || ""} onChange={e => handleChange(idx, 'linkdin_url', e.target.value)} placeholder="LinkedIn" />
 
                         <label className={labelStyle}>GitHub URL</label>
-                        <input className={`${inputStyle} w-[620px]`} value={member.github_url} onChange={e => handleChange(idx, 'github_url', e.target.value)} placeholder="GitHub" />
+                        <input className={`${inputStyle} w-[620px]`} value={member.github_url || ""} onChange={e => handleChange(idx, 'github_url', e.target.value)} placeholder="GitHub" />
 
                         <label className={labelStyle}>Instagram URL</label>
-                        <input className={`${inputStyle} w-[620px]`} value={member.insta_url} onChange={e => handleChange(idx, 'insta_url', e.target.value)} placeholder="Instagram" />
+                        <input className={`${inputStyle} w-[620px]`} value={member.insta_url || ""} onChange={e => handleChange(idx, 'insta_url', e.target.value)} placeholder="Instagram" />
 
                         <label className={labelStyle}>Projects</label>
                         <div className="flex flex-col gap-2 p-4 rounded-md opacity-100 shadow-[2px_2px_4px_0px_#00000040,inset_2px_2px_6px_0px_#FFFFFF80] bg-[#121212]">
@@ -421,6 +471,11 @@ const PeoplePage = () => {
               </div>
               <div className="flex flex-col max-h-[80vh]">
                 <div className="scroll-container overflow-y-auto px-6 pt-6 pb-2 flex flex-col gap-6" style={{ maxHeight: "calc(80vh - 130px)" }}>
+                  {activeTeamData.length === 0 && (
+                    <p className="text-white/60 text-center py-8">
+                      No team members yet. Click <strong>ADD NEW</strong> to create one.
+                    </p>
+                  )}
                   {activeTeamData.map((member, idx) => (
                     <div key={getMemberId(member, "alumni") || idx} className="flex gap-4 items-start p-4 rounded-lg">
                       <label className="relative min-w-[131px] w-[131px] h-[168px] shrink-0 cursor-pointer border-white border-2 rounded-xl">
@@ -442,16 +497,16 @@ const PeoplePage = () => {
                       </label>
                       <div className="flex flex-col grow gap-[6px] px-[10px] py-[12px]">
                         <label className={labelStyle}>Alumni Name</label>
-                        <input className={`${inputStyle} w-[620px]`} value={member.aluminiName} onChange={e => handleChange(idx, 'aluminiName', e.target.value)} placeholder="Alumni Name" />
+                        <input className={`${inputStyle} w-[620px]`} value={member.aluminiName || ""} onChange={e => handleChange(idx, 'aluminiName', e.target.value)} placeholder="Alumni Name" />
 
                         <label className={labelStyle}>Company Name</label>
-                        <input className={`${inputStyle} w-[620px]`} value={member.companyName} onChange={e => handleChange(idx, 'companyName', e.target.value)} placeholder="Company Name" />
+                        <input className={`${inputStyle} w-[620px]`} value={member.companyName || ""} onChange={e => handleChange(idx, 'companyName', e.target.value)} placeholder="Company Name" />
 
                         <label className={labelStyle}>LPA</label>
-                        <input className={`${inputStyle} w-[620px]`} value={member.lpa} onChange={e => handleChange(idx, 'lpa', e.target.value)} placeholder="LPA" />
+                        <input className={`${inputStyle} w-[620px]`} value={member.lpa || ""} onChange={e => handleChange(idx, 'lpa', e.target.value)} placeholder="LPA" />
 
                         <label className={labelStyle}>Content</label>
-                        <input className={`${inputStyle} w-[620px]`} value={member.content} onChange={e => handleChange(idx, 'content', e.target.value)} placeholder="Content" />
+                        <input className={`${inputStyle} w-[620px]`} value={member.content || ""} onChange={e => handleChange(idx, 'content', e.target.value)} placeholder="Content" />
                       </div>
                       <img
                         src={deletei}

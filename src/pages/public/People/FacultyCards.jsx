@@ -1,35 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import alumni3 from "../../../assets/graphics/alumni3.svg";
+import { usePageContent } from "../../../context/PageContentContext";
 
 const FacultyMentors = () => {
-  const [mentors, setMentors] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(false);
-    setMentors([]);
-  }, []);
+  const { content, loading } = usePageContent();
+  const { facultyHeading, facultyMentors } = content.people;
 
   return (
     <div className="flex flex-col items-center justify-center px-4 py-25">
       <h2 className="text-white text-4xl md:text-5xl font-bold mb-12 text-center">
-        Faculty Mentors
+        {facultyHeading}
       </h2>
 
       {loading ? (
         <p className="text-white/80 text-center">Loading faculty mentors...</p>
-      ) : mentors.length === 0 ? (
+      ) : facultyMentors.length === 0 ? (
         <p className="text-white/60 text-center">No faculty mentors to display.</p>
       ) : (
         <div className="flex flex-col md:flex-row gap-8 justify-center items-center w-full">
-          {mentors.map((mentor, idx) => (
+          {facultyMentors.map((mentor, idx) => (
             <div
-              key={mentor.id || idx}
+              key={idx}
               className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl flex flex-col items-center p-6 w-[320px] md:w-[340px] transition-transform hover:scale-105 shadow-[2px_2px_4px_0px_#00000040,inset_2px_2px_6px_0px_#FFFFFF80]"
             >
               <div className="w-full h-[380px] rounded-2xl overflow-hidden mb-4 flex items-center justify-center bg-gray-900/10">
                 <img
-                  src={mentor.img || alumni3}
+                  src={alumni3}
                   alt={mentor.name}
                   className="w-full h-full object-cover rounded-2xl"
                 />

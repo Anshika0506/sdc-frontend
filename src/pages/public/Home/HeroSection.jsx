@@ -3,8 +3,11 @@ import left from "../../../assets/graphics/leftimage.svg";
 import right from "../../../assets/graphics/rightimage.svg";
 import { getProject } from "../../../api/Public/getProjectDetails";
 import { getPeople } from "../../../api/Public/getPeople";
+import { usePageContent } from "../../../context/PageContentContext";
 
 const HeroSection = () => {
+  const { content } = usePageContent();
+  const { hero } = content.home;
   const [stats, setStats] = useState({ projects: 0, students: 0 });
   const [loading, setLoading] = useState(true);
 
@@ -53,11 +56,11 @@ const HeroSection = () => {
 
         <h1 className="text-center text-[7vw] sm:text-[4vw] font-bold leading-snug z-20 mt-4 sm:mt-0">
           <span className="text-transparent bg-clip-text bg-[linear-gradient(180deg,var(--Colors-Text-Primary,#FFF)_0%,var(--inputFileds-placeholderColour-Focus,#2B88A8)_200%)]">
-            Empowering IDEAS
+            {hero.titleLine1}
           </span>
           <br />
           <span className="text-transparent bg-clip-text bg-[linear-gradient(180deg,var(--Colors-Text-Primary,#FFF)_0%,var(--inputFileds-placeholderColour-Focus,#2B88A8)_100%)]">
-            Through CODE
+            {hero.titleLine2}
           </span>
         </h1>
 
@@ -81,8 +84,7 @@ const HeroSection = () => {
           className="mt-4 sm:mt-8 text-xs md:text-lg sm:text-base text-white text-center max-w-xs sm:max-w-xl z-20"
           style={{ fontFamily: "Inter, sans-serif" }}
         >
-          We're a foundation driven by purpose and powered by technology —
-          delivering software solutions that create lasting impact.
+          {hero.subtitle}
         </p>
 
         <div className="absolute bottom-0 left-0 w-full h-[35%] sm:h-[40%] flex z-10">

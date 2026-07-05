@@ -16,6 +16,7 @@ This file documents all Public and Admin API endpoints, their frontend function 
 | postContact          | Public/postContact.js       | /public/contact                  | Submit contact form        |
 | faq (getFAQs)        | Public/faq.js               | /public/faqs                     | Get FAQs                   |
 | gallery              | Public/gallery.js           | /public/gallery                  | Get gallery images         |
+| getPageContent       | Public/pageContent.js       | /public/page-content             | Get editable page content  |
 
 ---
 
@@ -23,6 +24,8 @@ This file documents all Public and Admin API endpoints, their frontend function 
 
 | Function Name         | File                                 | Endpoint                        | Description                |
 |----------------------|--------------------------------------|----------------------------------|----------------------------|
+| getAdminPageContent  | Admin/pageContent.js                 | /admin/page-content              | Get page content (admin)   |
+| updatePageContent    | Admin/pageContent.js                 | /admin/page-content              | Update page content        |
 | getPeople            | Admin/People/getPeople.js            | /admin/people                    | Get all team members       |
 | postPeople           | Admin/People/postPeople.js           | /admin/people                    | Add a new team member      |
 | updatePeople         | Admin/People/updatePeople.js         | /admin/people/:id                | Update a team member       |

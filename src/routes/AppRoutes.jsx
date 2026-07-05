@@ -30,6 +30,7 @@ import FAQSection from '../pages/admin/FAQSection';
 import CareerPage from '../pages/admin/CareerPage';
 import PeoplePage from '../pages/admin/PeoplePage';
 import Profile from '../pages/admin/AdminProfile';
+import PageContentAdmin from '../pages/admin/PageContent';
 
 const AppRoutes = () => {
   return (
@@ -62,6 +63,7 @@ const AppRoutes = () => {
           <Route path="manage-services" element={<AdminServices />} />
           <Route path="manage-faqs" element={<FAQSection />} />
           <Route path="manage-career" element={<CareerPage />} />
+          <Route path="manage-content" element={<PageContentAdmin />} />
           <Route path="manage-people" element={<PeoplePage />} />
           <Route path="profile" element={<Profile />} />
           <Route path="*" element={<Testimonial />} />

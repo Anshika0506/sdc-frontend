@@ -1,8 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { isAuthenticated, clearAuthData, getAdminData } from "../utils/cookieAuth";
-import { loginAdmin } from "../api/Admin/login";
+import {
+  isAuthenticated,
+  clearAuthData,
+  getAdminData,
+  storeAuthData,
+} from "../utils/cookieAuth";
+import { loginAdmin, verifyToken, logoutAdmin } from "../api/Admin/login";
 
 const AuthContext = createContext();
+const SESSION_TOKEN = "session";
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -17,25 +23,37 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
-  // ✅ AUTH CHECK ON LOAD
-  const checkAuthStatus = () => {
-    try {
-      const hasAuth = isAuthenticated();
+  const setSession = (adminData) => {
+    storeAuthData(adminData, SESSION_TOKEN);
+    localStorage.setItem("token", SESSION_TOKEN);
+    setIsLoggedIn(true);
+    setUser(adminData);
+  };
 
-      if (!hasAuth) {
-        setIsLoggedIn(false);
-        setUser(null);
+  const clearSession = () => {
+    clearAuthData();
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    setUser(null);
+  };
+
+  const checkAuthStatus = async () => {
+    try {
+      if (isAuthenticated()) {
+        setIsLoggedIn(true);
+        setUser(getAdminData());
         return;
       }
 
-      const adminData = getAdminData();
-
-      setIsLoggedIn(true);
-      setUser(adminData || { authenticated: true });
-    } catch (error) {
-      console.error("Auth check failed:", error);
-      setIsLoggedIn(false);
-      setUser(null);
+      const result = await verifyToken();
+      if (result?.status !== false) {
+        const adminData = result?.data || getAdminData();
+        if (adminData) {
+          setSession(adminData);
+        }
+      }
+    } catch {
+      clearSession();
     } finally {
       setLoading(false);
     }
@@ -45,27 +63,31 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus();
   }, []);
 
-  // ✅ LOGIN
   const login = async (email, password) => {
     try {
-      const userData = await loginAdmin(email, password);
+      const response = await loginAdmin(email, password);
+      const adminData = response?.data;
 
-      setIsLoggedIn(true);
-      setUser(userData);
+      if (!adminData) {
+        throw new Error("Login failed. No user data returned.");
+      }
 
-      return userData;
+      setSession(adminData);
+      return adminData;
     } catch (error) {
-      setIsLoggedIn(false);
-      setUser(null);
+      clearSession();
       throw error;
     }
   };
 
-  // ✅ LOGOUT
-  const logout = () => {
-    clearAuthData();
-    setIsLoggedIn(false);
-    setUser(null);
+  const logout = async () => {
+    try {
+      await logoutAdmin();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      clearSession();
+    }
   };
 
   return (

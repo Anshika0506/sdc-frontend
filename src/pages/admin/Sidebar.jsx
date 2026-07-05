@@ -6,6 +6,7 @@ const Sidebar = () => {
   const links = [
     { to: "/admin/manage-testimonials", label: "TESTIMONIALS PAGE" },
     { to: "/admin/manage-about", label: "ABOUT DETAILS" },
+    { to: "/admin/manage-content", label: "PAGE CONTENT" },
     { to: "/admin/manage-work", label: "PROJECT PAGE" },
     { to: "/admin/manage-people", label: "PEOPLE PAGE" },
     { to: "/admin/manage-faqs", label: "FAQ'S PAGE" },

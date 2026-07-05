@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { getAllGalleryImages } from "../../../api/gallery";
+import { usePageContent } from "../../../context/PageContentContext";
 
 const OverviewSection = () => {
+  const { content } = usePageContent();
+  const { overview, howWeWork } = content.about;
   const [aboutImages, setAboutImages] = useState([]);
 
   useEffect(() => {
@@ -62,20 +65,13 @@ const OverviewSection = () => {
           className="text-white font-semibold mb-4"
           style={{ fontFamily: "Inter", fontSize: 48 }}
         >
-          Overview
+          {overview.heading}
         </h2>
         <p
           className="text-gray-200 font-mono text-justify"
           style={{ fontSize: 16 }}
         >
-          The Developers’ Community is a student-led initiative at Medi-Caps
-          University, designed to empower aspiring developers through
-          collaboration, innovation, and hands-on problem-solving. It serves as
-          a dynamic space where students come together to explore real-world
-          challenges, exchange ideas, and build impactful tech-driven solutions.
-          The platform drives a culture of continuous learning, peer-to-peer
-          growth, and purpose-driven development — beyond the boundaries of the
-          classroom.
+          {overview.body}
         </p>
       </section>
 
@@ -105,28 +101,20 @@ const OverviewSection = () => {
             className="text-white font-bold"
             style={{ fontFamily: "Inter", fontSize: 48 }}
           >
-            How We Work?
+            {howWeWork.heading}
           </h2>
           <p
             className="text-sm font-mono text-gray-300 md:pt-[2.5rem]"
             style={{ fontWeight: 400, fontSize: 16 }}
           >
-           We function as a student-led, collaborative ecosystem
+            {howWeWork.tagline}
           </p>
         </div>
         <p
           className="text-sm font-mono text-gray-300 mt-4"
           style={{ fontWeight: 400, fontSize: 16 }}
         >
-           where learning and building go hand in hand. Every project begins with identifying
-          real-world challenges, followed by brainstorming and developing
-          practical, tech-driven solutions. Students from diverse domains —
-          developers, designers, and problem-solvers — work in cross-functional
-          teams, combining creativity with execution. Guided by mentorship and
-          supported by institutional resources, our process encourages hands-on
-          learning, continuous experimentation, and a shared commitment to
-          meaningful outcomes. Our approach is agile, purpose-driven, and deeply
-          rooted in community collaboration.
+          {howWeWork.body}
         </p>
       </section>
     </>

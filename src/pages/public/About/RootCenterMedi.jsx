@@ -1,9 +1,12 @@
-// File: components/RootCenterMedi.jsx
 import React from "react";
 import medi from "../../../assets/graphics/center.svg";
 import center from "../../../assets/graphics/medi1.svg";
+import { usePageContent } from "../../../context/PageContentContext";
 
 const RootCenterMedi = () => {
+  const { content } = usePageContent();
+  const { root } = content.about;
+
   return (
     <div className="flex flex-col lg:flex-row items-center justify-center gap-6 max-w-6xl mx-auto mt-20 px-4">
       <div
@@ -17,18 +20,13 @@ const RootCenterMedi = () => {
           className="text-3xl font-bold mb-2"
           style={{ fontFamily: "Inter", fontWeight: 600, fontSize: 48 }}
         >
-          Root
+          {root.heading}
         </h3>
         <p
           className="text-sm font-mono text-gray-200 text-justify py-[8px] pr-[11px] pl-[8px]"
           style={{ fontWeight: 400, fontSize: 16 }}
         >
-          The Developers’ Community operates within the innovation-centric
-          environment of Medi-Caps University, where the Centre for Innovation
-          (CFI) acts as a core enabler of problem-solving, idea validation, and
-          impactful execution. This collaboration of institutional support and
-          focused innovation has created the foundation that drives our platform
-          forward.
+          {root.body}
         </p>
       </div>
 

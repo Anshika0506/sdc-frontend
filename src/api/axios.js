@@ -5,14 +5,14 @@ console.log("API URL =", import.meta.env.VITE_API_BASE_URL);
 
 // 🌐 Public API instance for unauthenticated requests (registration, public content)
 export const publicApi = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: '/api',
   timeout: 30000,
   withCredentials: false, // ✅ Disable cookies for public endpoints to avoid CORS issues
 });
 
 // 🔐 Login API instance with credentials for cookie-based authentication
 export const loginApi = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: '/api',
   timeout: 30000,
   withCredentials: true, // ✅ Enable cookies for login endpoint
 });

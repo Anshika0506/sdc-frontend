@@ -3,7 +3,7 @@ import { clearAuthData } from '../utils/cookieAuth';
 
 // 🔐 Authenticated API instance for admin and protected routes
 export const authApi = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: '/api',
   timeout: 10000,
   withCredentials: true, // ✅ Enables automatic cookie sending (JWT from backend)
 });

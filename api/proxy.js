@@ -1,3 +1,9 @@
+export const config = {
+  api: {
+    bodyParser: false, // Disable automatic body parsing to forward raw upload streams
+  },
+};
+
 export default async function handler(req, res) {
   const targetUrl = 'https://sdc-backend-production.up.railway.app' + req.url.replace(/^\/api/, '');
 
